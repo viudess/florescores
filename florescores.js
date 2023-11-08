@@ -1,4 +1,3 @@
-
 const mongoose = require("mongoose");
 const express = require("express");
 const bodyParser = require("body-parser");
@@ -9,59 +8,68 @@ app.use(bodyParser.json());
 
 const port = 3000;
 
-mongoose.connect("mongodb://127.0.0.1:27017/dbflorescores", {
+mongoose.connect("mongodb://127.0.0.1:27017/florescores", {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
 
 const UsuarioSchema = new mongoose.Schema({
-  nome: { type: String },
-  email: { type: String, required: true },
-  endereco: { type: String },
-  numero: { type: Number },
-  cep: { type: String, required: true },
-  nascimento: { type: Date, required: true },
+    email : {type : String, required : true},
+    senha : {type : String}
 });
+
+const ProdutofloresSchema = new mongoose.Schema({
+    id_produtoflores : {type : String, required : true},
+    descricao : {type : String},
+    tipo : {type : String},
+    dataentrega : {type : Date},
+    quantidadeestoque : {type : Number}
+})
 
 const Usuario = mongoose.model("Usuario", UsuarioSchema);
 
+const Produtoflores = mongoose.model("Produtoflores",ProdutofloresSchema)
+
 app.post("/cadastrousuario", async (req, res) => {
-  const nome = req.body.nome;
   const email = req.body.email;
-  const endereco = req.body.endereco;
-  const numero = req.body.numero;
-  const cep = req.body.cep;
-  const nascimento = req.body.nascimento;
-
-  if(nome == null || email == null || endereco == null || numero == null || cep == null || nascimento == null){
-    return res.status(400).json({error : "Preenchar todos os campos!!!"});
-  }
-
-  const emailExiste = await Usuario.findOne({email : email});
-
-  if(emailExiste){
-    return res.status(400).json({error : "O email informado já existe"});
-  }
-
+  const senha = req.body.senha;
   
+   
   const usuario = new Usuario({
-    nome: nome,
     email: email,
-    endereco: endereco,
-    numero: numero,
-    cep: cep,
-    nascimento: nascimento
-  });
+    senha: senha
+});
 
   try {
     const newUsuario = await usuario.save();
     res.json({ error: null, msg: "Cadastro ok", UsuarioId: newUsuario._id });
   } catch (error) {}
+
 });
 
-app.get("/cadastrousuario", async (req, res) => {
-  res.sendFile(__dirname + "/cadastrousuario.html");
-});
+app.post("/cadastroprodutoflores", async (req, res) => {
+    
+    
+    const id_produtoflores = req.body.id_produtoflores;
+    const descricao = req.body.descricao;
+    const tipo = req.body.id_tipo;
+    const dataentrega = req.body.dataentrega;
+    const quantidadeestoque = req.body.quantidadeestoque;
+     
+    const produtoflores = new Produtoflores({
+      id_produtoflores: id_produtoflores,
+      descricao: descricao,
+      tipo: tipo,
+      dataentrega: dataentrega,
+      quantidadeestoque: quantidadeestoque
+    });
+  
+    try {
+      const newProdutoflores = await produtoflores.save();
+      res.json({ error: null, msg: "Cadastro ok", ProdutofloresId: newProdutoflores._id });
+    } catch (error) {}
+  
+  });
 
 app.get("/", async (req, res) => {
   res.sendFile(__dirname + "/index.html");
